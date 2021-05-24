@@ -1,0 +1,89 @@
+== Serverless Kotlin Kafka
+
+== ws-to-kafka
+
+=== Dev (TestContainer Kafka):
+
+[source,shell script]
+----
+./gradlew :ws-to-kafka:bootRun
+----
+
+.consume messaged with schema
+[source,shell script]
+----
+docker exec -it schema-registry /usr/bin/kafka-json-schema-console-consumer --topic mytopic --bootstrap-server broker:9092
+----
+
+
+=== Prod (External Kafka):
+
+[source,shell script]
+----
+export KAFKA_BOOTSTRAP_SERVERS=YOUR_BOOTSTRAP_SERVERS
+export KAFKA_USERNAME=YOUR_CCLOUD_KEY
+export KAFKA_PASSWORD=YOUR_CCLOUD_PASSWORD
+export SCHEMA_REGISTRY_URL=YOUR_CCLOUD_SCHEMA_REGISTRY_URL
+export SCHEMA_REGISTRY_KEY=YOUR_SCHEMA_REGISTRY_USERNAME
+export SCHEMA_REGISTRY_PASSWORD=YOUR_SCHEMA_REGISTRY_PASSWORD
+
+./gradlew :ws-to-kafka:run
+----
+
+.containerize & run
+[source,shell script]
+----
+./gradlew :ws-to-kafka:bootBuildImage --imageName=jsk-ws-to-kafka
+
+# using env vars from above
+docker run -it \
+  -eKAFKA_BOOTSTRAP_SERVERS=$KAFKA_BOOTSTRAP_SERVERS \
+  -eKAFKA_USERNAME=$KAFKA_USERNAME \
+  -eKAFKA_PASSWORD=$KAFKA_PASSWORD \
+  -eSCHEMA_REGISTRY_URL=$SCHEMA_REGISTRY_URL \
+  -eSCHEMA_REGISTRY_KEY=$SCHEMA_REGISTRY_KEY \
+  -eSCHEMA_REGISTRY_PASSWORD=$SCHEMA_REGISTRY_PASSWORD \
+  jsk-ws-to-kafka
+----
+
+
+== web-ui
+
+=== Dev (TestContainer Kafka):
+
+[source,shell script]
+----
+./gradlew :web-ui:bootRun
+----
+
+View the Web UI: http://localhost:8080
+
+=== Prod (External Kafka):
+
+[source,shell script]
+----
+export KAFKA_BOOTSTRAP_SERVERS=YOUR_BOOTSTRAP_SERVERS
+export KAFKA_USERNAME=YOUR_CCLOUD_KEY
+export KAFKA_PASSWORD=YOUR_CCLOUD_PASSWORD
+export SCHEMA_REGISTRY_URL=YOUR_CCLOUD_SCHEMA_REGISTRY_URL
+export SCHEMA_REGISTRY_KEY=YOUR_SCHEMA_REGISTRY_USERNAME
+export SCHEMA_REGISTRY_PASSWORD=YOUR_SCHEMA_REGISTRY_PASSWORD
+
+./gradlew :web-ui:run
+----
+
+.containerize & run
+[source,shell script]
+----
+./gradlew :web-ui:bootBuildImage --imageName=jsk-web-ui
+
+# using env vars from above
+docker run -it \
+  -eKAFKA_BOOTSTRAP_SERVERS=$KAFKA_BOOTSTRAP_SERVERS \
+  -eKAFKA_USERNAME=$KAFKA_USERNAME \
+  -eKAFKA_PASSWORD=$KAFKA_PASSWORD \
+  -eSCHEMA_REGISTRY_URL=$SCHEMA_REGISTRY_URL \
+  -eSCHEMA_REGISTRY_KEY=$SCHEMA_REGISTRY_KEY \
+  -eSCHEMA_REGISTRY_PASSWORD=$SCHEMA_REGISTRY_PASSWORD \
+  jsk-web-ui
+----

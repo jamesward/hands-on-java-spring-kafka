@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>StackOverflow to WS</title>
+    <style>
+        html {
+            font-family: sans-serif;
+        }
+    </style>
+    <script>
+        const wsurl = new URL(window.location);
+        wsurl.protocol = window.location.protocol === "https:" ? 'wss' : 'ws';
+        wsurl.pathname = '/questions';
+
+        const ws = new WebSocket(wsurl);
+        ws.onopen = () => { document.getElementById('status').innerText = 'Most Popular StackOverflow Questions' };
+        ws.onmessage = (message) => {
+            console.log(message.data);
+            const data = JSON.parse(message.data);
+
+            const template = document.getElementById('question');
+            const question = document.importNode(template.content, true);
+
+            for (const element of question.children) {
+                for (const key in data) {
+                    element.innerHTML = element.innerHTML.replace(new RegExp('{{' + key + '}}'), data[key]);
+                }
+            }
+
+            document.getElementById('questions').appendChild(question);
+        };
+        ws.onerror = (error) => {
+            console.error(error);
+            document.getElementById('status').innerText = 'Query error'
+        };
+        ws.onclose = (event) => {
+            console.log(event);
+        };
+    </script>
+</head>
+<body>
+<p id="status">Querying Most Popular StackOverflow Questions</p>
+<ul id="questions">
+    <template id="question">
+        <li><a href="{{url}}">{{title}}</a> (favorites: {{favorite_count}}, views: {{view_count}})</li>
+    </template>
+</ul>
+</body>
+</html>
